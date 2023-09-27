@@ -12,14 +12,24 @@
           </tr>
         </thead>
         <tbody>
-          <% contacts.forEach((contact, i) => { %>
+          <% if (contacts.length === 0) { %>
+          <tr>
+            <td colspan="4">
+              <div class="alert alert-danger fw-bold" role="alert">
+                Contact data's still empty.
+              </div>
+            </td>
+          </tr>
+          <% } %> <% contacts.forEach((contact, i) => { %>
           <tr>
             <th scope="row"><%= i + 1 %></th>
             <td><%= contact.nama %></td>
             <td><%= contact.nohp %></td>
             <td>
               <!-- nama ditambahkan untuk parameter fungsi findContact() -->
-              <a href="/contact/<%= contact.nama %>" class="btn btn-success badge rounded-pill"
+              <a
+                href="/contact/<%= contact.nama %>"
+                class="btn btn-success badge rounded-pill"
                 ><i class="bi bi-info-circle"></i> detail</a
               >
             </td>
