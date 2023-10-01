@@ -8,6 +8,11 @@ const {
 } = require("./utils/contacts");
 const { body, validationResult, check } = require("express-validator"); // body: untuk menangkap apa yang diisikan di form. validationResult: unutk menyimpan data validasinya
 
+// Kumpulan module untuk fitur flash message ketika data berhasil ditambahkan: express-session, cookie-parser, connect-flash
+const session = require('express-session')
+const cookieParser = require('cookie-parser')
+const flash = require('connect-flash')
+
 const app = express();
 const port = 3000;
 
@@ -16,6 +21,16 @@ app.set("view engine", "ejs");
 app.use(expressLayouts); // third party middleware
 app.use(express.static("public")); // Built-in middleware
 app.use(express.urlencoded({ extended: true })); // Built-in middleware
+
+// Konfigurasi Flash
+app.use(cookieParser('secret'))
+app.use(session({
+  cookie: {maxAge: 6000},
+  secret: 'secret',
+  resave: true,
+  saveUninitialized: true
+}))
+app.use(flash())
 
 app.get("/", (req, res) => {
   /* 
@@ -44,6 +59,7 @@ app.get("/contact", (req, res) => {
     layout: "layouts/main-layout",
     title: "Contact Page",
     contacts,
+    msg: req.flash('msg') // disclaimer: hanya kode buatan sendiri. di res.render() sendiri udah ada msg untuk nangkap flash message yang kitga buat
   });
 });
 
@@ -82,6 +98,8 @@ app.post(
       });
     } else {
       addContact(req.body);
+      // Kirim flash message
+      req.flash('msg', 'New contact has been added!') // kirim 'msg'-nya (lihat code: fm.2 => di route app.get('/contact))
       res.redirect("/contact");
     }
   }
