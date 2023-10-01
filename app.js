@@ -1,7 +1,6 @@
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
-const {loadContact, findContact} = require('./utils/contacts')
-
+const { loadContacts, findContact, addContact } = require("./utils/contacts");
 const app = express();
 const port = 3000;
 
@@ -9,6 +8,7 @@ const port = 3000;
 app.set("view engine", "ejs");
 app.use(expressLayouts); // third party middleware
 app.use(express.static("public")); // Built-in middleware
+app.use(express.urlencoded({extended: true})) // Built-in middleware
 
 app.get("/", (req, res) => {
   /* 
@@ -17,8 +17,7 @@ app.get("/", (req, res) => {
   res.render("index", {
     nama: "Rizqi Siti Rahmah",
     title: "NODEJS",
-    mahasiswa,
-    layout: 'layouts/main-layout'
+    layout: "layouts/main-layout",
   });
 });
 
@@ -31,25 +30,44 @@ app.get("/about", (req, res) => {
 
 // 1. Task 1: Load data contacts.json
 app.get("/contact", (req, res) => {
-  const contacts = loadContact()
+  const contacts = loadContacts();
 
   // untuk view
   res.render("contact", {
     layout: "layouts/main-layout",
     title: "Contact Page",
-    contacts
+    contacts,
   });
+});
+
+// Task 3: Fitur tambah data kontak
+app.get("/contact/add", (req, res) => {
+  res.render("add-contact", {
+    title: "Form add contact",
+    layout: "layouts/main-layout",
+  });
+});
+
+// Task 4: Fitur proses data kontak dari form
+// data dengan method="post" harus di parsing dulu pakai app.use(express.urlencoded())
+// untuk menangkap data dengan method="post" => ada di req.body
+app.post("/contact", (req, res) => {
+    // res.send(req.body) // res.send() => untuk menampilkan data ke halaman (kayak echo kalau di PHP)
+
+  addContact(req.body)
+  // kalo di redirect, maka routes yang akan menangani ini bukan post, tapi get.
+  res.redirect('/contact')
 });
 
 // Task 2: Fitur detail kontak berdasarkan nama
 app.get("/contact/:nama", (req, res) => {
-  const contact = findContact(req.params.nama)
+  const contact = findContact(req.params.nama);
 
   // untuk view
   res.render("detail", {
     layout: "layouts/main-layout",
     title: "Detail Page",
-    contact
+    contact,
   });
 });
 

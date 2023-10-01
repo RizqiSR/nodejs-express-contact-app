@@ -8,18 +8,31 @@ if (!fs.existsSync(dirPath)) {
   fs.writeFileSync(filePath, "[]", "utf-8");
 }
 
-// Ambil semua data dari contacts.json
-const loadContact = () => {
+// 1. Ambil semua data dari contacts.json : yang di return bentuknya JS object
+const loadContacts = () => {
   const fileJSON = fs.readFileSync(filePath, "utf-8"); // output: string
   const contacts = JSON.parse(fileJSON); // output: JS object/array of object
   return contacts;
 };
 
-// Cari kontak berdasarkan nama
+// 2. Cari kontak berdasarkan nama
 const findContact = (nama) => {
-  const contacts = loadContact()
+  const contacts = loadContacts()
   const contact = contacts.find(contact => contact.nama.toLowerCase() === nama.toLowerCase())
   return contact
 }
 
-module.exports = { loadContact, findContact };
+// 3. Menuliskan / Menimpa file contacts.json dengan data baru
+// - tidak langsung ditambahkan, karena method ini akan digunakan di method lain untuk ubah, hapus, dll
+const saveContacts = (contacts) => {
+  fs.writeFileSync(filePath, JSON.stringify(contacts)) // masuk kesini, JS object contacts harus dalam bentuk string
+}
+
+// Menambahkan data contact baru
+const addContact = (contact) => {
+  const contacts = loadContacts()
+  contacts.push(contact)
+  saveContacts(contacts)
+}
+
+module.exports = { loadContacts, findContact, addContact };

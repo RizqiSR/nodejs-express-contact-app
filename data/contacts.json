@@ -1,12 +1,1 @@
-[
-  {
-    "nama": "Rizqi",
-    "nohp": "082113125827",
-    "email": "rizqi@gmail.com"
-  },
-  {
-    "nama": "Siti",
-    "nohp": "082113125827",
-    "email": "siti@gmail.com"
-  }
-]
+[{"nama":"Rizqi","nohp":"082113125827","email":"rizqi@gmail.com"},{"nama":"Siti","nohp":"082113125827","email":"siti@gmail.com"},{"nama":"Rahmah","email":"rahmah@gmail.com","nohp":"082113125827"},{"nama":"Kiki","email":"kiki@gmail.com","nohp":"082113125827"}]

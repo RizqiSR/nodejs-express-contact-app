@@ -21,6 +21,7 @@
     <%- include('nav') %>
 
     <div class="container">
+      <!-- body: untuk menangkap layout berbeda. jadi untuk konten dinamis default-nya pati masuk ke 'body' ini. caranya tinggal tambah layout: layouts/main-layout di res.render('route', {layot:..., title: ...}) -->
       <%- body %>
     </div>
 
