@@ -1,6 +1,8 @@
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const { loadContacts, findContact, addContact } = require("./utils/contacts");
+const { body, validationResult, check } = require("express-validator"); // body: untuk menangkap apa yang diisikan di form. validationResult: unutk menyimpan data validasinya
+
 const app = express();
 const port = 3000;
 
@@ -8,7 +10,7 @@ const port = 3000;
 app.set("view engine", "ejs");
 app.use(expressLayouts); // third party middleware
 app.use(express.static("public")); // Built-in middleware
-app.use(express.urlencoded({extended: true})) // Built-in middleware
+app.use(express.urlencoded({ extended: true })); // Built-in middleware
 
 app.get("/", (req, res) => {
   /* 
@@ -51,13 +53,19 @@ app.get("/contact/add", (req, res) => {
 // Task 4: Fitur proses data kontak dari form
 // data dengan method="post" harus di parsing dulu pakai app.use(express.urlencoded())
 // untuk menangkap data dengan method="post" => ada di req.body
-app.post("/contact", (req, res) => {
-    // res.send(req.body) // res.send() => untuk menampilkan data ke halaman (kayak echo kalau di PHP)
-
-  addContact(req.body)
-  // kalo di redirect, maka routes yang akan menangani ini bukan post, tapi get.
-  res.redirect('/contact')
-});
+app.post(
+  "/contact",
+  [
+    check("email", "Email tidak valid").isEmail(),
+    check("nohp", "Nomor tidak valid").isMobilePhone("id-ID"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+  }
+);
 
 // Task 2: Fitur detail kontak berdasarkan nama
 app.get("/contact/:nama", (req, res) => {
