@@ -1,6 +1,11 @@
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
-const { loadContacts, findContact, addContact } = require("./utils/contacts");
+const {
+  loadContacts,
+  findContact,
+  addContact,
+  duplicateCheck,
+} = require("./utils/contacts");
 const { body, validationResult, check } = require("express-validator"); // body: untuk menangkap apa yang diisikan di form. validationResult: unutk menyimpan data validasinya
 
 const app = express();
@@ -56,13 +61,28 @@ app.get("/contact/add", (req, res) => {
 app.post(
   "/contact",
   [
+    // body('sesuaikan dengan name="" di <input>).custom(value dari form dengan method="post") => {}')
+    body("nama").custom((value) => {
+      const duplicate = duplicateCheck(value);
+      if (duplicate) {
+        throw new Error(`Nama ${value} sudah terdaftar!`); // kalau sudah 'Throw' sama dengan return false, tapi return false dengan pesan error (return false, supaya masuk ke const errors = validationResult(req))
+      }
+      return true;
+    }),
     check("email", "Email tidak valid").isEmail(),
     check("nohp", "Nomor tidak valid").isMobilePhone("id-ID"),
   ],
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      res.render("add-contact", {
+        title: "Add contact form",
+        layout: "layouts/main-layout",
+        errors: errors.array(),
+      });
+    } else {
+      addContact(req.body);
+      res.redirect("/contact");
     }
   }
 );

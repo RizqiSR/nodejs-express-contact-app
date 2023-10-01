@@ -28,11 +28,17 @@ const saveContacts = (contacts) => {
   fs.writeFileSync(filePath, JSON.stringify(contacts)) // masuk kesini, JS object contacts harus dalam bentuk string
 }
 
-// Menambahkan data contact baru
+// 4. Menambahkan data contact baru
 const addContact = (contact) => {
   const contacts = loadContacts()
   contacts.push(contact)
   saveContacts(contacts)
 }
 
-module.exports = { loadContacts, findContact, addContact };
+// 5. Cek nama duplikat
+const duplicateCheck = (nama) => {
+  const contacts = loadContacts()
+  return contacts.find(contact => contact.nama === nama)
+}
+
+module.exports = { loadContacts, findContact, addContact, duplicateCheck };
