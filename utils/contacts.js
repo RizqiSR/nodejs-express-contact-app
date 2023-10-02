@@ -17,28 +17,56 @@ const loadContacts = () => {
 
 // 2. Cari kontak berdasarkan nama
 const findContact = (nama) => {
-  const contacts = loadContacts()
-  const contact = contacts.find(contact => contact.nama.toLowerCase() === nama.toLowerCase())
-  return contact
-}
+  const contacts = loadContacts();
+  const contact = contacts.find(
+    (contact) => contact.nama.toLowerCase() === nama.toLowerCase()
+  );
+  return contact;
+};
 
 // 3. Menuliskan / Menimpa file contacts.json dengan data baru
 // - tidak langsung ditambahkan, karena method ini akan digunakan di method lain untuk ubah, hapus, dll
 const saveContacts = (contacts) => {
-  fs.writeFileSync(filePath, JSON.stringify(contacts)) // masuk kesini, JS object contacts harus dalam bentuk string
-}
+  fs.writeFileSync(filePath, JSON.stringify(contacts)); // masuk kesini, JS object contacts harus dalam bentuk string
+};
 
 // 4. Menambahkan data contact baru
 const addContact = (contact) => {
-  const contacts = loadContacts()
-  contacts.push(contact)
-  saveContacts(contacts)
-}
+  const contacts = loadContacts();
+  contacts.push(contact);
+  saveContacts(contacts);
+};
 
 // 5. Cek nama duplikat
 const duplicateCheck = (nama) => {
-  const contacts = loadContacts()
-  return contacts.find(contact => contact.nama === nama)
-}
+  const contacts = loadContacts();
+  return contacts.find((contact) => contact.nama === nama);
+};
 
-module.exports = { loadContacts, findContact, addContact, duplicateCheck };
+// 6. Hapus kontak berdasarkan nama
+const deleteContact = (nama) => {
+  const contacts = loadContacts();
+  const filteredContacts = contacts.filter((contact) => contact.nama !== nama);
+  saveContacts(filteredContacts);
+};
+
+// 7. Ubah contacts
+const updateContacts = (newContact) => {
+  const contacts = loadContacts();
+  // Hilangkan kontak lama yang nama === oldNama
+  const filteredContacts = contacts.filter(
+    (contact) => contact.nama !== newContact.oldNama
+  );
+  delete newContact.oldNama;
+  filteredContacts.push(newContact);
+  saveContacts(filteredContacts);
+};
+
+module.exports = {
+  loadContacts,
+  findContact,
+  addContact,
+  duplicateCheck,
+  deleteContact,
+  updateContacts,
+};

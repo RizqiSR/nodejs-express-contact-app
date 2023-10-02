@@ -5,13 +5,14 @@ const {
   findContact,
   addContact,
   duplicateCheck,
+  deleteContact, updateContacts
 } = require("./utils/contacts");
 const { body, validationResult, check } = require("express-validator"); // body: untuk menangkap apa yang diisikan di form. validationResult: unutk menyimpan data validasinya
 
 // Kumpulan module untuk fitur flash message ketika data berhasil ditambahkan: express-session, cookie-parser, connect-flash
-const session = require('express-session')
-const cookieParser = require('cookie-parser')
-const flash = require('connect-flash')
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
+const flash = require("connect-flash");
 
 const app = express();
 const port = 3000;
@@ -23,14 +24,16 @@ app.use(express.static("public")); // Built-in middleware
 app.use(express.urlencoded({ extended: true })); // Built-in middleware
 
 // Konfigurasi Flash
-app.use(cookieParser('secret'))
-app.use(session({
-  cookie: {maxAge: 6000},
-  secret: 'secret',
-  resave: true,
-  saveUninitialized: true
-}))
-app.use(flash())
+app.use(cookieParser("secret"));
+app.use(
+  session({
+    cookie: { maxAge: 6000 },
+    secret: "secret",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+app.use(flash());
 
 app.get("/", (req, res) => {
   /* 
@@ -59,7 +62,7 @@ app.get("/contact", (req, res) => {
     layout: "layouts/main-layout",
     title: "Contact Page",
     contacts,
-    msg: req.flash('msg') // disclaimer: hanya kode buatan sendiri. di res.render() sendiri udah ada msg untuk nangkap flash message yang kitga buat
+    msg: req.flash("msg"), // disclaimer: hanya kode buatan sendiri. di res.render() sendiri udah ada msg untuk nangkap flash message yang kitga buat
   });
 });
 
@@ -99,7 +102,66 @@ app.post(
     } else {
       addContact(req.body);
       // Kirim flash message
-      req.flash('msg', 'New contact has been added!') // kirim 'msg'-nya (lihat code: fm.2 => di route app.get('/contact))
+      req.flash("msg", "New contact has been added!"); // kirim 'msg'-nya (lihat code: fm.2 => di route app.get('/contact))
+      res.redirect("/contact");
+    }
+  }
+);
+
+// 5. Proses delete contact
+app.get("/contact/delete/:nama", (req, res) => {
+  const contact = findContact(req.params.nama);
+
+  if (!contact) {
+    res.status(404);
+    res.send("<h1>404</h1>");
+  } else {
+    deleteContact(req.params.nama);
+
+    req.flash("msg", "Contact has been deleted!"); // kirim 'msg'-nya (lihat code: fm.2 => di route app.get('/contact))
+    res.redirect("/contact");
+  }
+});
+
+// 6. Form Ubah data kontak
+app.get("/contact/edit/:nama", (req, res) => {
+  const contact = findContact(req.params.nama);
+
+  res.render("edit-contact", {
+    title: "Form edit contact",
+    layout: "layouts/main-layout",
+    contact,
+  });
+});
+
+// 7. Proses ubah data
+app.post(
+  "/contact/update",
+  [
+    // body('sesuaikan dengan name="" di <input>).custom(value dari form dengan method="post") => {}')
+    body("nama").custom((value, {req}) => {
+      const duplicate = duplicateCheck(value);
+      if (value !== req.body.oldNama && duplicate) {
+        throw new Error(`Nama ${value} sudah terdaftar!`); // kalau sudah 'Throw' sama dengan return false, tapi return false dengan pesan error (return false, supaya masuk ke const errors = validationResult(req))
+      }
+      return true;
+    }),
+    check("email", "Email tidak valid").isEmail(),
+    check("nohp", "Nomor tidak valid").isMobilePhone("id-ID"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.render("edit-contact", {
+        title: "Edit contact form",
+        layout: "layouts/main-layout",
+        errors: errors.array(),
+        contact: req.body
+      });
+    } else {
+      updateContacts(req.body);
+      // Kirim flash message
+      req.flash("msg", "Contact has been edited!"); // kirim 'msg'-nya (lihat code: fm.2 => di route app.get('/contact))
       res.redirect("/contact");
     }
   }
