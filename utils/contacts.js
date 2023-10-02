@@ -53,13 +53,19 @@ const deleteContact = (nama) => {
 // 7. Ubah contacts
 const updateContacts = (newContact) => {
   const contacts = loadContacts();
-  // Hilangkan kontak lama yang nama === oldNama
-  const filteredContacts = contacts.filter(
-    (contact) => contact.nama !== newContact.oldNama
+  // Mengganti 1 element pada array di lokasi element lama berada.
+  // Jadi urutan nomor tidak akan berubah.
+  // findIndex() : mengambil index dari kontak yang diedit
+  // splice(index yang akan diubah isinya, perubahan berapa banyak, isi baru untuk mengganti element lama) : mengganti isinya
+  const editedContactIndex = contacts.findIndex(
+    (contact) => contact.nama === newContact.oldNama
   );
-  delete newContact.oldNama;
-  filteredContacts.push(newContact);
-  saveContacts(filteredContacts);
+
+  if (editedContactIndex >= 0) {
+    delete newContact.oldNama;
+    contacts.splice(editedContactIndex, 1, newContact);
+    saveContacts(contacts)
+  }
 };
 
 module.exports = {
